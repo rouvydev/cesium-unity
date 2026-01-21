@@ -17,30 +17,6 @@ jobs:
           cd native~
           npm ci
           npm run format -- --dry-run -Werror
-  Documentation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Doxygen
-        run: |
-          cd ~
-          wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
-          tar xzf doxygen-1.13.2.linux.bin.tar.gz
-          export PATH=$PWD/doxygen-1.13.2/bin:$PATH
-          echo "PATH=$PATH" >> "$GITHUB_ENV"
-          doxygen --version
-      - name: Check out repository code
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Generate Documentation
-        run: |
-          npm run doxygen
-      - name: Publish Documentation Artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ReferenceDocumentation
-          path: Documentation~/Reference
   Windows:
     needs: [QuickChecks]
     runs-on: windows-latest
