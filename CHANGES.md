@@ -74,6 +74,10 @@ In addition to the above, this release updates [cesium-native](https://github.co
 
 In addition to the above, this release updates [cesium-native](https://github.com/CesiumGS/cesium-native) from v0.56.0 to v0.57.0. See the [changelog](https://github.com/CesiumGS/cesium-native/blob/main/CHANGES.md) for a complete list of changes in cesium-native.
 
+##### Additions :tada:
+
+- Added tvOS support.
+
 ## v1.21.0 - 2026-01-05
 
 ##### Additions :tada:

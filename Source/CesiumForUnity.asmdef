@@ -12,9 +12,10 @@
         "iOS",
         "LinuxStandalone64",
         "macOSStandalone",
+        "tvOS",
         "WSA",
-        "WindowsStandalone64",
-        "WebGL"
+        "WebGL",
+        "WindowsStandalone64"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

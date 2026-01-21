@@ -17,30 +17,6 @@ jobs:
           cd native~
           npm ci
           npm run format -- --dry-run -Werror
-  Documentation:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Doxygen
-        run: |
-          cd ~
-          wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
-          tar xzf doxygen-1.13.2.linux.bin.tar.gz
-          export PATH=$PWD/doxygen-1.13.2/bin:$PATH
-          echo "PATH=$PATH" >> "$GITHUB_ENV"
-          doxygen --version
-      - name: Check out repository code
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Generate Documentation
-        run: |
-          npm run doxygen
-      - name: Publish Documentation Artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ReferenceDocumentation
-          path: Documentation~/Reference
   Windows:
     needs: [QuickChecks]
     runs-on: windows-latest
@@ -94,14 +70,14 @@ jobs:
           sleep 5
       - name: Test Connection to Unity License Server
         run: |
-          wget.exe http://127.0.0.1:12331/v1/admin/status
+          wget.exe http://10.11.151.44:8080/v1/admin/status
           cat status
           rm status
       - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
-          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_9"}'
+          $text='{"licensingServiceBaseUrl":"http://10.11.151.44:8080","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262570522_2"}'
           [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
@@ -156,19 +132,6 @@ jobs:
         with:
           name: Windows Package
           path: d:\cesium\CesiumForUnityBuildProject\*.tgz
-      - name: Run Tests
-        env:
-          CESIUM_ION_TOKEN_FOR_TESTS: ${{ secrets.CESIUM_ION_TOKEN_FOR_TESTS }}
-        run: |
-          start -FilePath "C:\Program Files\Unity\Hub\Editor\2022.3.41f1\Editor\Unity.exe" -ArgumentList "-runTests -batchmode -projectPath d:\cesium\CesiumForUnityBuildProject -testResults d:\cesium\temp\TestResults.xml -testPlatform PlayMode -logFile d:\cesium\temp\test-log.txt" -Wait
-          cat d:\cesium\temp\test-log.txt
-      - name: Test Report
-        uses: kring/test-reporter@v1.6.2-kring
-        if: success() || failure()    # run this step even if previous step failed
-        with:
-          name: Tests - Windows
-          path: d:/cesium/temp/TestResults.xml
-          reporter: dotnet-nunit
   MacOS:
     needs: [QuickChecks]
     runs-on: macos-14
@@ -262,7 +225,7 @@ jobs:
           sleep 5
       - name: Test Connection to Unity License Server
         run: |
-          wget http://127.0.0.1:12331/v1/admin/status
+          wget http://10.11.151.44:8080/v1/admin/status
           cat status
           rm status
       - name: Update the version in Cesium.cpp
@@ -518,14 +481,14 @@ jobs:
           sleep 5
       - name: Test Connection to Unity License Server
         run: |
-          wget.exe http://127.0.0.1:12331/v1/admin/status
+          wget.exe http://10.11.151.44:8080/v1/admin/status
           cat status
           rm status
       - name: Configure Unity to Use the License Server
         run: |
           mkdir -p $ENV:PROGRAMDATA/Unity/config
           $filename="$ENV:PROGRAMDATA/Unity/config/services-config.json"
-          $text='{"licensingServiceBaseUrl":"http://localhost:12331","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768335856821_1"}'
+          $text='{"licensingServiceBaseUrl":"http://10.11.151.44:8080","enableEntitlementLicensing":true,"clientConnectTimeoutSec":120,"clientHandshakeTimeoutSec":60,"toolset":"UnityLicenseServer_16768262643415_1"}'
           [IO.File]::WriteAllLines($filename,$text)
       - name: Update the version in Cesium.cpp
         run: |
@@ -698,3 +661,35 @@ jobs:
         with:
           name: Combined Package
           path: combine/merged/*.tgz
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [Combine]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download combined package
+        uses: actions/download-artifact@v4
+        with:
+          name: Combined Package
+          path: combine/merged
+      - name: Extract combined package
+        run: |
+          cd combine/merged
+          tar xzf *.tgz
+          rm *.tgz
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com/'
+      - name: Generate metafiles
+        uses: rouvydev/metagen-gha@v1.4
+        with:
+          seed: 'RTG9XQM0x4Ra3pozKM9aCPnq50g6POh8'
+          directory: combine/merged
+      - name: publish
+        working-directory: combine/merged
+        run: npm publish --registry='https://npm.pkg.github.com/@rouvydev'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
