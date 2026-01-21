@@ -109,6 +109,31 @@ namespace CesiumForUnity
             EditorApplication.Exit(0);
         }
 
+        public static void CompileForTvOSAndExit()
+        {
+            CompileCesiumForUnityNative.ExitAfterCompile = true;
+
+            string buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(buildPath);
+            try
+            {
+                BuildPlayer(BuildTargetGroup.tvOS, BuildTarget.tvOS, Path.Combine(buildPath, "tvOS"), false);
+                // Check that the XCode project is able to build
+                System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
+                    $"-project {Path.Combine(buildPath, "tvOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
+                p.WaitForExit();
+                if (p.ExitCode != 0)
+                    throw new Exception("xcodebuild failed");
+            }
+            finally
+            {
+                if (Directory.Exists(Path.Combine(buildPath, "tvOS")))
+                    Directory.Delete(Path.Combine(buildPath, "tvOS"), true);
+                Directory.Delete(buildPath, true);
+            }
+            EditorApplication.Exit(0);
+        }
+
         public static void CompileForWindowsAndExit()
         {
             CompileCesiumForUnityNative.ExitAfterCompile = true;

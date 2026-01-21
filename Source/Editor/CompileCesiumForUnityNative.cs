@@ -128,6 +128,7 @@ namespace CesiumForUnity
                 case BuildTarget.WSAPlayer:
                     return $"{baseName}.dll";
                 case BuildTarget.iOS:
+                case BuildTarget.tvOS:
                     return $"lib{baseName}.a";
                 case BuildTarget.StandaloneOSX:
                     return $"lib{baseName}.dylib";
@@ -370,6 +371,16 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
             }
 
+            if (platform.platformGroup == BuildTargetGroup.tvOS)
+            {
+                library.Toolchain = "extern/tvos-toolchain.cmake";
+                library.ExtraConfigureArgs.Add("-GXcode");
+                library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=tvOS");
+                library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=arm64");
+                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
+            }
+
             if (platform.platform == BuildTarget.StandaloneOSX)
             {
                 if (cpu != null)
@@ -488,9 +499,11 @@ namespace CesiumForUnity
                     // Unity's symbols.
                     bool supportsWebGL = library.Platform == BuildTarget.WebGL && !assetPath.EndsWith("libastcenc-none-static.a");
                     bool supportsIOS = library.Platform == BuildTarget.iOS;
+                    bool supportsTvOS = library.Platform == BuildTarget.tvOS;
 
                     importer.SetCompatibleWithPlatform(BuildTarget.WebGL, supportsWebGL);
                     importer.SetCompatibleWithPlatform(BuildTarget.iOS, supportsIOS);
+                    importer.SetCompatibleWithPlatform(BuildTarget.tvOS, supportsTvOS);
 
                     importer.SaveAndReimport();
                 }
@@ -559,7 +572,7 @@ namespace CesiumForUnity
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.UseShellExecute = false;
-                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS)
+                    if (library.Platform == BuildTarget.StandaloneOSX || library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.tvOS)
                     {
                         startInfo.FileName = File.Exists("/Applications/CMake.app/Contents/bin/cmake") ? "/Applications/CMake.app/Contents/bin/cmake" : "cmake";
                     }
@@ -655,7 +668,7 @@ namespace CesiumForUnity
 
                     // Refresh the asset database for platforms that use static linking so the Unity
                     // builder can find the libraries.
-                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL)
+                    if (library.Platform == BuildTarget.iOS || library.Platform == BuildTarget.WebGL || library.Platform == BuildTarget.tvOS)
                     {
                         AssetDatabase.Refresh();
                         SetStaticLibrariesPlatform(library);

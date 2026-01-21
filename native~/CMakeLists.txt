@@ -126,7 +126,7 @@ endif()
 set(CESIUM_INSTALL_HEADERS OFF)
 
 # We only need cesium-native's static lib files to be installed on iOS and Wasm.
-if (NOT IOS AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+if (NOT IOS AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten" AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "tvOS")
     set(CESIUM_INSTALL_STATIC_LIBS OFF)
 endif()
 
@@ -159,7 +159,7 @@ endif()
 file(GLOB_RECURSE CESIUMFORUNITYNATIVE_SOURCES CONFIGURE_DEPENDS src/Runtime/*.cpp ${REINTEROP_GENERATED_DIRECTORY}/src/*.cpp)
 file(GLOB_RECURSE CESIUMFORUNITYNATIVE_HEADERS CONFIGURE_DEPENDS src/Runtime/*.h ${REINTEROP_GENERATED_DIRECTORY}/src/*.h)
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR CESIUM_TARGET_WASM)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "tvOS" OR CESIUM_TARGET_WASM)
     add_library(CesiumForUnityNative STATIC)
 else()
     add_library(CesiumForUnityNative SHARED)
@@ -253,7 +253,7 @@ endif()
 set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
 
 # Specify all targets that need to compile bitcode
-if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "tvOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
   install(TARGETS tidy-static)
   set_target_properties(tidy-static PROPERTIES EXCLUDE_FROM_ALL 0 EXCLUDE_FROM_DEFAULT_BUILD 0)
 endif()

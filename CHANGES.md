@@ -6,6 +6,10 @@
 
 - Fixed a typo in the the name of the `CesiumGoogleMapTilesRasterOverlay.cs` file that prevented users from adding this component to a `GameObject` in more recent versions of Unity.
 
+##### Additions :tada:
+
+- Added tvOS support.
+
 ## v1.21.0 - 2026-01-05
 
 ##### Additions :tada:

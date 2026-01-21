@@ -27,6 +27,7 @@ namespace Build
             "UWP",
             "Web",
             "Windows",
+            "tvOS",
         };
 
         public void Run(Options options)
@@ -319,6 +320,29 @@ namespace Build
 
                     Console.WriteLine("**** Adding generated files (for the iOS Player) to the package");
                     AddGeneratedFiles("!UNITY_EDITOR && UNITY_IOS", generatedPath, outputGeneratedPath);
+
+                    // Clean the generated code directory.
+                    Directory.Delete(generatedPath, true);
+                    Directory.CreateDirectory(generatedPath);
+                }
+
+                if (options.Platforms.Contains("tvOS"))
+                {
+                    Console.WriteLine("**** Compiling for tvOS Player");
+                    unity.Run(new[]
+                    {
+                        "-batchmode",
+                        "-nographics",
+                        "-projectPath",
+                        Utility.ProjectRoot,
+                        "-buildTarget",
+                        "tvOS",
+                        "-executeMethod",
+                        "CesiumForUnity.BuildCesiumForUnity.CompileForTvOSAndExit"
+                    });
+
+                    Console.WriteLine("**** Adding generated files (for the tvOS Player) to the package");
+                    AddGeneratedFiles("!UNITY_EDITOR && UNITY_TVOS", generatedPath, outputGeneratedPath);
 
                     // Clean the generated code directory.
                     Directory.Delete(generatedPath, true);

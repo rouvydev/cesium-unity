@@ -11,9 +11,10 @@
         "Editor",
         "iOS",
         "macOSStandalone",
+        "tvOS",
         "WSA",
-        "WindowsStandalone64",
-        "WebGL"
+        "WebGL",
+        "WindowsStandalone64"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
