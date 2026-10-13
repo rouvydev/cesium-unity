@@ -258,7 +258,12 @@ namespace CesiumForUnity
                 }
             }
 
-            if (ExitAfterCompile)
+            // Exiting from inside BuildPlayer crashes Unity 6000.6 while it shuts down (SIGSEGV in
+            // BuildReport.AddMessage), turning a successful run into exit code 255. For the Apple
+            // mobile targets, let the build finish instead; the caller exits afterwards.
+            bool isAppleMobile = report.summary.platformGroup == BuildTargetGroup.iOS ||
+                report.summary.platformGroup == BuildTargetGroup.tvOS;
+            if (ExitAfterCompile && !isAppleMobile)
             {
                 EditorApplication.Exit(LastRunExitCode);
             }

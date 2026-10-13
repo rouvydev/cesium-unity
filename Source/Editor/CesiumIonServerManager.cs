@@ -136,6 +136,12 @@ namespace CesiumForUnity
         {
             static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
             {
+                // Don't resume Cesium ion sessions in batch mode (e.g. package builds). They need the
+                // native library, which may only be a placeholder at that point, and an exception
+                // logged while the editor is exiting a build can crash Unity.
+                if (Application.isBatchMode)
+                    return;
+
                 CesiumIonServerManager.instance.ResumeAll();
 
                 // Ensure the `serverForNewObjects` matches the current server. This is
