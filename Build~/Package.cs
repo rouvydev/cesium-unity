@@ -152,7 +152,7 @@ namespace Build
                     {
                         configureArgs = configureArgs.Concat(new[]
                         {
-                            "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+                            "-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"
                         }).ToList();
 
                         // On macOS, we must build the native code twice, once for x86_64 and once for arm64.
