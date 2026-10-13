@@ -368,7 +368,7 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=iOS");
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=arm64");
-                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
+                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=15.0");
             }
 
             if (platform.platformGroup == BuildTargetGroup.tvOS)
@@ -378,7 +378,7 @@ namespace CesiumForUnity
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_NAME=tvOS");
                 library.ExtraConfigureArgs.Add("-DCMAKE_SYSTEM_PROCESSOR=aarch64");
                 library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=arm64");
-                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=12");
+                library.ExtraConfigureArgs.Add("-DOSX_DEPLOYMENT_TARGET=15.0");
             }
 
             if (platform.platform == BuildTarget.StandaloneOSX)
@@ -386,7 +386,7 @@ namespace CesiumForUnity
                 if (cpu != null)
                     library.ExtraConfigureArgs.Add("-DCMAKE_OSX_ARCHITECTURES=" + cpu.ToString().ToLowerInvariant());
 
-                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15");
+                library.ExtraConfigureArgs.Add("-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0");
             }
 
             if (platform.platform == BuildTarget.WSAPlayer)
