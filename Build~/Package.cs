@@ -116,7 +116,12 @@ namespace Build
                     if (OperatingSystem.IsWindows())
                         platformEditorConditional = "UNITY_EDITOR_WIN";
                     else if (OperatingSystem.IsMacOS())
-                        platformEditorConditional = "UNITY_EDITOR_OSX";
+                    {
+                        // The generated Editor code doesn't depend on the OS it was generated on, so the
+                        // code generated here is also valid for the Windows Editor. This lets us produce
+                        // the Windows Editor code without a Windows machine.
+                        platformEditorConditional = "UNITY_EDITOR_OSX || UNITY_EDITOR_WIN";
+                    }
                     else if (OperatingSystem.IsLinux())
                         platformEditorConditional = "UNITY_EDITOR_LINUX";
 
