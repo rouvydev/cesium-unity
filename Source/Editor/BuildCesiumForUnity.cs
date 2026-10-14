@@ -220,6 +220,10 @@ namespace CesiumForUnity
                 scenes = new[] { "Assets/Scenes/Empty.unity" }
             });
 
+            // The build was intentionally aborted after the C# was compiled and the code was generated.
+            if (CompileCesiumForUnityNative.AbortedAfterCodeGeneration)
+                return;
+
             if (report.summary.totalErrors > 0)
             {
                 StringBuilder errorReport = new StringBuilder();

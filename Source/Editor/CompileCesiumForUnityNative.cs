@@ -218,6 +218,12 @@ namespace CesiumForUnity
         private static int LastRunExitCode = 0;
 
         /// <summary>
+        /// True if the player build was deliberately aborted after the C# compilation because
+        /// CESIUM_SKIP_NATIVE_BUILD is set. The code generation has already happened at that point.
+        /// </summary>
+        public static bool AbortedAfterCodeGeneration = false;
+
+        /// <summary>
         /// Invoked after the managed script assemblies are compiled, including the CesiumForUnity
         /// managed code. Building the CesiumForUnity assembly will generate C++ code via Reinterop,
         /// so we implement this method in order to compile that generated C++ code to a shared library
@@ -226,13 +232,30 @@ namespace CesiumForUnity
         /// <param name="report"></param>
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
+            // When CESIUM_SKIP_NATIVE_BUILD is set, only the C# compilation (and the Reinterop code
+            // generation it triggers) is needed. This allows generating the C# classes for a platform
+            // whose native library can't be built on this machine, such as Windows on macOS.
+            bool skipNativeBuild = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CESIUM_SKIP_NATIVE_BUILD"));
+
             LibraryToBuild[] libraries = GetLibrariesToBuildForPlatform(report.summary, finalLibrariesOnly: false);
-            foreach (LibraryToBuild library in libraries)
+            if (skipNativeBuild)
             {
-                BuildNativeLibrary(library);
+                UnityEngine.Debug.Log("CESIUM_SKIP_NATIVE_BUILD is set; skipping the native library build.");
+
+                // Exiting from inside BuildPlayer crashes Unity 6000.6, so abort the build instead.
+                // BuildCesiumForUnity.BuildPlayer treats this as success.
+                AbortedAfterCodeGeneration = true;
+                throw new BuildFailedException("Stopping after code generation because CESIUM_SKIP_NATIVE_BUILD is set.");
+            }
+            else
+            {
+                foreach (LibraryToBuild library in libraries)
+                {
+                    BuildNativeLibrary(library);
+                }
             }
 
-            if (report.summary.platform == BuildTarget.StandaloneOSX)
+            if (!skipNativeBuild && report.summary.platform == BuildTarget.StandaloneOSX)
             {
                 // On macOS, build for both ARM64 and x64, and then use the lipo tool to combine
                 // the libraries for the two CPUs into a single library.
