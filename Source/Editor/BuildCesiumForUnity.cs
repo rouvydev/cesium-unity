@@ -93,12 +93,16 @@ namespace CesiumForUnity
             try
             {
                 BuildPlayer(BuildTargetGroup.iOS, BuildTarget.iOS, Path.Combine(buildPath, "iOS"), false);
-                // Check that the XCode project is able to build
-                System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
-                  $"-project {Path.Combine(buildPath, "iOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    throw new Exception("xcodebuild failed");
+                // The Xcode project doesn't exist if the build was stopped after code generation.
+                if (!CompileCesiumForUnityNative.AbortedAfterCodeGeneration)
+                {
+                    // Check that the XCode project is able to build
+                    System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
+                      $"-project {Path.Combine(buildPath, "iOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                        throw new Exception("xcodebuild failed");
+                }
             }
             finally
             {
@@ -118,12 +122,16 @@ namespace CesiumForUnity
             try
             {
                 BuildPlayer(BuildTargetGroup.tvOS, BuildTarget.tvOS, Path.Combine(buildPath, "tvOS"), false);
-                // Check that the XCode project is able to build
-                System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
-                    $"-project {Path.Combine(buildPath, "tvOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                    throw new Exception("xcodebuild failed");
+                // The Xcode project doesn't exist if the build was stopped after code generation.
+                if (!CompileCesiumForUnityNative.AbortedAfterCodeGeneration)
+                {
+                    // Check that the XCode project is able to build
+                    System.Diagnostics.Process p = System.Diagnostics.Process.Start("xcodebuild",
+                        $"-project {Path.Combine(buildPath, "tvOS/game/Unity-iPhone.xcodeproj")} CODE_SIGNING_ALLOWED=NO");
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                        throw new Exception("xcodebuild failed");
+                }
             }
             finally
             {
