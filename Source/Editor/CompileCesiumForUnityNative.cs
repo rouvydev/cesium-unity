@@ -289,7 +289,16 @@ namespace CesiumForUnity
                 report.summary.platform == BuildTarget.StandaloneOSX;
             if (ExitAfterCompile && !isApplePlatform)
             {
-                EditorApplication.Exit(LastRunExitCode);
+                // Abort the build with an exception instead of calling EditorApplication.Exit, which
+                // crashes here. BuildCesiumForUnity.BuildPlayer treats the abort as success only if
+                // the native build succeeded; otherwise the logged errors fail the run.
+                if (LastRunExitCode == 0)
+                {
+                    AbortedAfterCodeGeneration = true;
+                    throw new BuildFailedException("The native library was built; stopping the player build here.");
+                }
+
+                throw new BuildFailedException("The native library build failed with exit code " + LastRunExitCode + ".");
             }
         }
 
